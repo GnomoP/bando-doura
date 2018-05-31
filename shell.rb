@@ -56,8 +56,8 @@ class Shell
       begin
         eval(input)
       rescue Exception => e
+        puts e.backtrace.join ""
         puts e.message
-        puts e.backtrace[0]
       else
         puts "Done."
       end

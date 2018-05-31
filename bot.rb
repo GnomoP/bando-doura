@@ -4,6 +4,7 @@ require 'discordrb'
 require 'json'
 require './shell'
 
+OK = "\U1F44C".freeze
 BYE = "\U1F44B".freeze
 
 if ARGV[0]
@@ -25,20 +26,51 @@ end
 class CommandBot < Discordrb::Commands::CommandBot
   def pick_quote
 
-    File.open("./quotes.json") do |f|
-      quotes = JSON.parse(f.read)["frases"]
-
-      if quotes.any?
-        return quotes.sample
-      else
-        return "Manutenção sempre é foda nesse país..."
-      end
+    begin
+      quotes = File.read("./quotes.json")
+      quotes = JSON.parse(quotes)["frases"]
+      raise unless quotes.any?
+    rescue Exception => e
+      puts e.backtrace.join ""
+      puts e.message
+      "Manutenção sempre é foda nesse país..."
+    else
+      quotes.sample
     end
 
   end
+
+  def add_quote quote
+
+    begin
+      quotes = File.read("./quotes.json")
+      quotes = JSON.parse(quotes)["frases"] << quote
+
+      File.open("./quotes.json", "w") do |f|
+        f.puts(JSON.pretty_generate({"frases" => quotes}))
+      end
+    rescue Exception => e
+      puts e.backtrace.join ""
+      puts e.message
+    end
+
+  end
+
 end
 
 bot = CommandBot.new token: OPT["bot_token"], prefix: OPT["prefix"], client_id: OPT["client_id"]
+
+bot.command :add do |event, *text|
+  text = text.join(' ')
+  begin
+    bot.add_quote(text) and next
+  rescue Exception => e
+    puts e.backtrace.join ""
+    puts e.message
+  else
+    "Acha que eu sou gado pra ficar me ordenando?"
+  end
+end
 
 bot.command :ping do |event|
   mention = event.author.mention
@@ -46,9 +78,11 @@ bot.command :ping do |event|
   "#{mention} Criança, não me enche o saco (#{time.round(3)}ms)"
 end
 
-bot.command :invite do |event|
-  break unless event.user.id == OPT["bot_owner"]
+bot.command :source do |event|
+  OPT["source_repo"]
+end
 
+bot.command :invite do |event|
   event.bot.invite_url
 end
 
@@ -72,12 +106,12 @@ bot.message(contains: bot.bot_user.mention, private: false) do |event|
   begin
     event.respond(bot.pick_quote)
     name = event.user.name
-    disc = event.user.descriminator
+    disc = event.user.discriminator
   rescue Exception => e
+    puts e.backtrace.join ""
     puts e.message
-    puts e.backtrace[0]
   else
-    puts "Successfuly replied to #{name}##{disc}"
+    puts "\nSuccessfuly replied to #{name}##{disc}"
   end
 end
 
