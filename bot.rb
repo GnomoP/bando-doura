@@ -56,46 +56,76 @@ class CommandBot < Discordrb::Commands::CommandBot
 
   end
 
+  def log_event event
+    server = event.server
+    author = event.author
+    channel = event.channel
+    message = event.message
+    time = Time.now
+    name = "#{author.name}##{author.discriminator}"
+
+    out = [
+      "[#{time}]:",
+      "    Author:  #{name} (#{author.id})",
+      "    Server:  #{server.name} (#{server.id})",
+      "    Channel: #{channel.name} (#{channel.id})",
+      "    Message: #{message.id}",
+      "    Content: #{message.content}",]
+    File.open("./requests.log", "a+") do |f|
+      f.puts out.join("\n")
+    end
+    puts "\nSuccessfuly replied to #{name} (#{server.id})"
+  end
+
 end
 
 bot = CommandBot.new token: OPT["bot_token"], prefix: OPT["prefix"], client_id: OPT["client_id"]
 
 bot.command :add do |event, *text|
+  if event.channel.private?
+    next "Muleque espertinho... (Sua frase **não** foi adicionada)"
+  end
+
   text = text.join(' ')
   begin
-    bot.add_quote(text) and next
+    bot.add_quote(text)
+    bot.log_event(event)
   rescue Exception => e
     puts e.backtrace.join ""
     puts e.message
   else
-    "Acha que eu sou gado pra ficar me ordenando?"
+    "Acha que eu sou gado pra ficar me mamando? (Sua frase foi adicionada)"
   end
 end
 
 bot.command :ping do |event|
   mention = event.author.mention
   time = (Time.now - event.timestamp).round(6) * 1000
+
+  bot.log_event(event) unless event.channel.private?
   "#{mention} Criança, não me enche o saco (#{time.round(3)}ms)"
 end
 
 bot.command :source do |event|
+  bot.log_event(event) unless event.channel.private?
   OPT["source_repo"]
 end
 
 bot.command :invite do |event|
+  bot.log_event(event) unless event.channel.private?
   event.bot.invite_url
 end
 
 bot.command :restart do |event|
   break unless event.user.id == OPT["bot_owner"]
-
+  bot.log_event(event) unless event.channel.private?
   event.message.react(BYE)
   exit 0
 end
 
 bot.command :quit do |event|
   break unless event.user.id == OPT["bot_owner"]
-
+  bot.log_event(event) unless event.channel.private?
   event.message.react(BYE)
   exit 1
 end
@@ -105,13 +135,11 @@ bot.run :async
 bot.message(contains: bot.bot_user.mention, private: false) do |event|
   begin
     event.respond(bot.pick_quote)
-    name = event.user.name
-    disc = event.user.discriminator
   rescue Exception => e
     puts e.backtrace.join ""
     puts e.message
-  else
-    puts "\nSuccessfuly replied to #{name}##{disc}"
+  ensure
+    bot.log_event(event)
   end
 end
 
