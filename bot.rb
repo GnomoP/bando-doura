@@ -2,6 +2,7 @@
 
 require 'discordrb'
 require 'json'
+require './shell'
 
 BYE = "\U1F44B".freeze
 
@@ -23,14 +24,17 @@ end
 
 class CommandBot < Discordrb::Commands::CommandBot
   def pick_quote
-    quote = "Manutenção sempre é foda nesse país..."
+
     File.open("./quotes.json") do |f|
-      unless f.read.empty?
-        quote = JSON.parse(f.read)["frases"].sample
+      quotes = JSON.parse(f.read)["frases"]
+
+      if quotes.any?
+        return quotes.sample
+      else
+        return "Manutenção sempre é foda nesse país..."
       end
     end
 
-    return quote
   end
 end
 
@@ -62,6 +66,8 @@ bot.command :quit do |event|
   exit 1
 end
 
+bot.run :async
+
 bot.message(contains: bot.bot_user.mention, private: false) do |event|
   begin
     event.respond(bot.pick_quote)
@@ -75,7 +81,5 @@ bot.message(contains: bot.bot_user.mention, private: false) do |event|
   end
 end
 
-bot.run :async
-
-shell = Shell.new(bot, BOT_CONFIG)
-shell.create_loop()
+shell = Shell.new(bot, OPT)
+shell.loop()

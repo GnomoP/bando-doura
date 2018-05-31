@@ -10,8 +10,8 @@ class Shell
     @read = Readline
     @list = config["shell_commands"]
 
-    user = bot.bot_user.name
-    disc = bot.bot_user.discriminator
+    user = bot.profile.name
+    disc = bot.profile.discriminator
     @prompt = "(#{user}##{disc}) >> "
 
     @read.completion_append_character = " "
@@ -26,9 +26,9 @@ class Shell
       @hist.pop and next if input == ""
       @hist.pop and next if input.match('^\s+$')
 
-      def send id, say: bot.pick_quote()
+      def send id: @cfg["commands_channel"], say: nil
         id = @bot.pm_channel(id).id if @bot.pm_channel(id) rescue id
-        @bot.send_message(id, say)
+        @bot.send_message(id, say || @bot.pick_quote())
       end
 
       def purge id: @cfg["commands_channel"], quant: 100
