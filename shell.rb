@@ -33,7 +33,7 @@ class Shell
     end
 
     def push commit: "Version bump"
-      system(["./push.sh", commit])
+      system("./push.sh \"#{commit}\"")
     end
 
     def read id: @cfg["commands_channel"], quant: 10
