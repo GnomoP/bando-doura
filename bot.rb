@@ -108,7 +108,7 @@ end
 
 bot = CommandBot.new token: OPT["bot_token"], prefix: OPT["prefix"], client_id: OPT["client_id"], parse_self: true
 
-bot.command :add do |event, *text|
+bot.command :add, description: "Adiciona uma frase ao dicionário" do |event, *text|
   bot.log_event(event) unless event.channel.private?
 
   if event.channel.private? and event.author.id != OPT["bot_owner"]
@@ -126,14 +126,14 @@ bot.command :add do |event, *text|
   end
 end
 
-bot.command :say do |event, *text|
+bot.command :say, description: "**[OWNER ONLY]** Manda uma mensagem" do |event, *text|
   break unless event.user.id == OPT["bot_owner"]
   bot.log_event(event) unless event.channel.private?
   event.message.delete() rescue puts "Couldn't delete message"
   text.join(' ')
 end
 
-bot.command :ping do |event|
+bot.command :ping, description: "Checa o ping do bot, em milisegundos" do |event|
   mention = event.author.mention
   time = (Time.now - event.timestamp).round(6) * 1000
 
@@ -141,45 +141,24 @@ bot.command :ping do |event|
   "#{mention} Criança, não me enche o saco (#{time.round(3)}ms)"
 end
 
-bot.command :source do |event|
+bot.command :source, description: "Manda o link pro repositório do Bot." do |event|
   bot.log_event(event) unless event.channel.private?
   OPT["source_repo"]
 end
 
-bot.command :purge do |event, quant=100, *condition|
-  next if event.user.id != OPT["bot_owner"] or event.channel.private?
-  bot.log_event(event) unless event.channel.private?
-
-  quant = Integer(quant) rescue 50
-
-  history = event.channel.history(quant).select do |m|
-    unless condition.empty?
-      m.author.id == bot.profile.id
-    else
-      eval(condition.join(' '))
-    end
-  end
-
-  if history.length < 2 or history.length > 100
-    next "Can only delete between 2 and 100 messages!"
-  end
-
-  event.channel.delete_messages(history, false)
-end
-
-bot.command :invite do |event|
+bot.command :invite, description: "Manda o link para convidar o Bot a um servidor" do |event|
   bot.log_event(event) unless event.channel.private?
   event.bot.invite_url
 end
 
-bot.command :restart do |event|
+bot.command :restart, description: "**[OWNER ONLY]** Reinicia o Bot" do |event|
   break unless event.user.id == OPT["bot_owner"]
   bot.log_event(event) unless event.channel.private?
   event.message.react(BYE) rescue nil
   exit 0
 end
 
-bot.command :quit do |event|
+bot.command :quit, description: "**[OWNER ONLY]** Desliga o Bot" do |event|
   break unless event.user.id == OPT["bot_owner"]
   bot.log_event(event) unless event.channel.private?
   event.message.react(BYE) rescue nil
@@ -201,7 +180,7 @@ end
 
 bot.private_message() { |event| bot.log_event(event) }
 bot.message(from: bot.profile, private: false) { |event| bot.log_event(event) }
-bot.ready() { |event| bot.update_status("online", { :game => OPT["game_status"] }, 0, false) }
+bot.ready() { |event| bot.game = OPT["game_status"] }
 
 shell = Shell.new(bot, OPT)
 shell.loop()
