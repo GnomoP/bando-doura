@@ -56,9 +56,6 @@ class CommandBot < Discordrb::Commands::CommandBot
 
   end
 
-  def remove_quote index = 0
-  end
-
   def log_event event
     author = event.author
     channel = event.channel
@@ -126,6 +123,27 @@ end
 bot.command :source do |event|
   bot.log_event(event)
   OPT["source_repo"]
+end
+
+bot.command :purge do |event, quant=100, *condition|
+  break if event.user.id != OPT["bot_owner"] or event.channel.private?
+  bot.log_event(event)
+
+  quant = Integer(quant) rescue 50
+
+  history = event.channel.history(quant).select do |m|
+    unless condition.empty?
+      m.author.id == bot.profile.id
+    else
+      eval(condition.join(' '))
+    end
+  end
+
+  if history.length < 2 or history.length > 100
+    next "Can only delete between 2 and 100 messages!"
+  end
+
+  event.channel.delete_messages(history, false)
 end
 
 bot.command :invite do |event|
