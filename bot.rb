@@ -57,6 +57,7 @@ class CommandBot < Discordrb::Commands::CommandBot
   end
 
   def log_event event
+
     author = event.author
     channel = event.channel
     message = event.message
@@ -81,6 +82,7 @@ class CommandBot < Discordrb::Commands::CommandBot
     File.open("./requests.log", "a+") do |f|
       f.puts out.join("\n")
     end
+
   end
 
 end
@@ -88,7 +90,7 @@ end
 bot = CommandBot.new token: OPT["bot_token"], prefix: OPT["prefix"], client_id: OPT["client_id"], parse_self: true
 
 bot.command :add do |event, *text|
-  bot.log_event(event)
+  bot.log_event(event) unless event.channel.private?
 
   if event.channel.private? and event.author.id != OPT["bot_owner"]
     next "Muleque espertinho... (Sua frase **não** foi adicionada)"
@@ -107,7 +109,7 @@ end
 
 bot.command :say do |event, *text|
   break unless event.user.id == OPT["bot_owner"]
-  bot.log_event(event)
+  bot.log_event(event) unless event.channel.private?
   event.message.delete() rescue nil
   text.join(' ')
 end
@@ -116,18 +118,18 @@ bot.command :ping do |event|
   mention = event.author.mention
   time = (Time.now - event.timestamp).round(6) * 1000
 
-  bot.log_event(event)
+  bot.log_event(event) unless event.channel.private?
   "#{mention} Criança, não me enche o saco (#{time.round(3)}ms)"
 end
 
 bot.command :source do |event|
-  bot.log_event(event)
+  bot.log_event(event) unless event.channel.private?
   OPT["source_repo"]
 end
 
 bot.command :purge do |event, quant=100, *condition|
-  break if event.user.id != OPT["bot_owner"] or event.channel.private?
-  bot.log_event(event)
+  next if event.user.id != OPT["bot_owner"] or event.channel.private?
+  bot.log_event(event) unless event.channel.private?
 
   quant = Integer(quant) rescue 50
 
@@ -147,20 +149,20 @@ bot.command :purge do |event, quant=100, *condition|
 end
 
 bot.command :invite do |event|
-  bot.log_event(event)
+  bot.log_event(event) unless event.channel.private?
   event.bot.invite_url
 end
 
 bot.command :restart do |event|
   break unless event.user.id == OPT["bot_owner"]
-  bot.log_event(event)
+  bot.log_event(event) unless event.channel.private?
   event.message.react(BYE) rescue nil
   exit 0
 end
 
 bot.command :quit do |event|
   break unless event.user.id == OPT["bot_owner"]
-  bot.log_event(event)
+  bot.log_event(event) unless event.channel.private?
   event.message.react(BYE) rescue nil
   exit 1
 end
@@ -174,7 +176,7 @@ bot.mention() do |event|
     puts e.backtrace.join ""
     puts e.message
   ensure
-    bot.log_event(event)
+    bot.log_event(event) unless event.channel.private?
   end
 end
 
