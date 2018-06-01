@@ -59,6 +59,7 @@ class CommandBot < Discordrb::Commands::CommandBot
   def log_event event
 
     author = event.author
+    server = event.server
     channel = event.channel
     message = event.message
 
@@ -71,12 +72,30 @@ class CommandBot < Discordrb::Commands::CommandBot
       "    Content: #{message.content}",]
 
     if channel.private?
-      out.insert(1, "    Sender:  #{name} (#{author.id})")
-    else
-      server = event.server
-      out.insert(1, "    Author:  #{name} (#{author.id})")
-      out.insert(2, "    Server:  #{server.name} (#{server.id})")
+
+      if author.id == bot.profile.id
+        author = event.channel.recipient
+        name = "#{author.name}##{author.discriminator}"
+        out.insert(1, "  Recipient: #{name} (#{author.id})")
+      else
+        out.insert(1, "    Sender:  #{name} (#{author.id})")
+      end
+
+    elsif channel.group?
+
+      if author.id == bot.profile.id
+        out.insert(1, "      Group: #{channel.name} (#{channel.id})")
+      else
+        out.insert(1, "     Author: #{name} (#{author.id})")
+        out.insert(2, "      Group: #{channel.name} (#{channel.id})")
+      end
+
+    elsif server
+
+      out.insert(1, "     Author: #{name} (#{author.id})")
+      out.insert(2, "     Server: #{server.name} (#{server.id})")
       out.insert(2, "    Channel: #{channel.name} (#{channel.id})")
+
     end
 
     File.open("./requests.log", "a+") do |f|
@@ -110,7 +129,7 @@ end
 bot.command :say do |event, *text|
   break unless event.user.id == OPT["bot_owner"]
   bot.log_event(event) unless event.channel.private?
-  event.message.delete() rescue nil
+  event.message.delete() rescue puts "Couldn't delete message"
   text.join(' ')
 end
 
@@ -180,11 +199,7 @@ bot.mention() do |event|
   end
 end
 
-bot.private_message() do |event|
-  next if event.author.id == bot.profile.id
-  bot.log_event(event)
-end
-
+bot.private_message() { |event| bot.log_event(event) }
 bot.message(from: bot.profile, private: false) { |event| bot.log_event(event) }
 bot.ready() { |event| bot.update_status("online", { :game => OPT["game_status"] }, 0, false) }
 
