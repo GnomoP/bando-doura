@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'readline'
-require './commands'
+require './shell_commands'
 
 class Shell
   include Commands

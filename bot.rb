@@ -85,7 +85,7 @@ class CommandBot < Discordrb::Commands::CommandBot
 
 end
 
-bot = CommandBot.new token: OPT["bot_token"], prefix: OPT["prefix"], client_id: OPT["client_id"]
+bot = CommandBot.new token: OPT["bot_token"], prefix: OPT["prefix"], client_id: OPT["client_id"], parse_self: true
 
 bot.command :add do |event, *text|
   bot.log_event(event)
@@ -167,10 +167,6 @@ end
 
 bot.run :async
 
-bot.ready() do |event|
-  bot.update_status("online", { :game => OPT["game_status"] }, 0, false)
-end
-
 bot.mention() do |event|
   begin
     event.respond(bot.pick_quote)
@@ -182,8 +178,13 @@ bot.mention() do |event|
   end
 end
 
-bot.private_message() { |event| bot.log_event(event) }
-bot.message(from: bot.profile.id) { |event| bot.log_event(event) }
+bot.private_message(from: not!(bot.profile)) do |event|
+  next if event.author.id == bot.profile.id
+  bot.log_event(event)
+end
+
+bot.message(from: bot.profile) { |event| bot.log_event(event) }
+bot.ready() { |event| bot.update_status("online", { :game => OPT["game_status"] }, 0, false) }
 
 shell = Shell.new(bot, OPT)
 shell.loop()
