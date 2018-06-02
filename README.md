@@ -37,10 +37,10 @@ Em caso de dúvida quanto o uso do bot localmente, entre em [contato](https://gi
 
 ## TODO
 
-[ ] Documentação apropriada.
-[ ] Atualizações automáticas das gems.
-[ ] Execução de comandos por menções ao bot.
-[ ] Auto-formatação das frases adicionadas pelo comando `add`.
++ [ ] Documentação apropriada.
++ [ ] Atualizações automáticas das gems.
++ [ ] Execução de comandos por menções ao bot.
++ [ ] Auto-formatação das frases adicionadas pelo comando `add`.
 
 ## Licensa
 
