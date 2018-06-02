@@ -48,5 +48,5 @@ Este produto é protegido pela licensa GNU General Public License, versão 3, e 
 
 ## Contato
 
-Email: [ks1202@pm.me](mailto:ks1202@pm.me)
-Discord: `GnomoP#3142`
++ Email: [ks1202@pm.me](mailto:ks1202@pm.me)
++ Discord: `GnomoP#3142`
