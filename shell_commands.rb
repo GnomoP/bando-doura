@@ -2,12 +2,12 @@
 
 module Commands
 
-def send id = @cfg["commands_channel"], say = nil
+def send id = @cfg["bot_owner"], say = nil
   id = @bot.pm_channel(id).id if @bot.pm_channel(id) rescue id
   @bot.send_message(id, say || @bot.pick_quote())
 end
 
-def purge id = @cfg["commands_channel"], quant = 50, condition = nil
+def purge id = @cfg["bot_owner"], quant = 50, condition = nil
   channel = @bot.pm_channel(id) rescue nil
   return unless channel
 
@@ -27,7 +27,7 @@ def purge id = @cfg["commands_channel"], quant = 50, condition = nil
   channel.delete_messages(history, false)
 end
 
-def read id = @cfg["commands_channel"], quant = 10
+def read id = @cfg["bot_owner"], quant = 10
   channel = @bot.pm_channel(id) if @bot.pm_channel(id) rescue nil
   channel ||= @bot.channel(id)
   channel.history(quant).reverse_each do |m|

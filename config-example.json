@@ -1,0 +1,8 @@
+{
+  "client_id": 0,
+  "bot_owner": 0,
+  "bot_token": "your token here",
+  "prefix": ">>",
+
+  "source_repo": "https://github.com/GnomoP/bando-doura"
+}

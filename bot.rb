@@ -242,10 +242,6 @@ end
 
 bot.run :async
 
-bot.ready do |event|
-  sleep(10) and bot.game = CONFIG["game_status"]
-end
-
 bot.mention contains: /prefixo?/i do |event|
   begin
     id = event.server.id rescue event.channel.id
