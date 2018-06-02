@@ -2,7 +2,6 @@
 
 require 'discordrb'
 require 'json'
-require './shell'
 
 OK = "\U1F44C"
 BYE = "\U1F44B"
@@ -210,7 +209,7 @@ bot.command :prefix, HELP[:prefix] do |event, *text|
   prefix = bot.get_prefixes()[id]
 
   prefix = CONFIG["prefix"] unless prefix
-  next "Prefixo atual: \"#{prefix}\". Use `#{prefix}prefix Novo Prefixo` para alterá-lo." if text.empty?
+  next "Prefixo atual: \"#{prefix}\". Use `#{prefix}prefix Novo prefixo` para alterá-lo." if text.empty?
 
   bot.add_prefix(id, text)
   "Prefixo alterado: de \"#{prefix}\" para \"#{text}\""
@@ -240,14 +239,20 @@ bot.command :quit, HELP[:quit] do |event|
   exit 1
 end
 
-bot.run :async
+begin
+  gem 'rb-readline'
+rescue Gem::LoadError
+  nil
+else
+  bot.run :async
+end
 
 bot.mention contains: /prefixo?/i do |event|
   begin
     id = event.server.id rescue event.channel.id
     prefix = bot.get_prefixes()[id] || "-"
 
-    event << "Prefixo atual: \"#{prefix}\". Use `#{prefix}prefix Novo Prefixo` para alterá-lo."
+    event << "Prefixo atual: \"#{prefix}\". Use `#{prefix}prefix Novo prefixo` para alterá-lo."
   rescue Exception => e
     puts e.backtrace.join ""
     puts e.message
@@ -275,5 +280,13 @@ bot.message from: bot.profile, private: false do |event|
   bot.log_event(event)
 end
 
-shell = Shell.new(bot, CONFIG)
-shell.loop()
+begin
+  gem 'br-readline'
+rescue Gem::LoadError
+  bot.run
+else
+  require './shell'
+  shell = Shell.new(bot, CONFIG)
+
+  shell.loop()
+end

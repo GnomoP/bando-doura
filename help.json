@@ -21,7 +21,7 @@
 
   "prefix": {
     "description": "Mostra ou muda o prefixo utilizado no servidor ou no grupo privado.",
-    "usage": "-prefix` ou `-prefix Novo Prefixo"
+    "usage": "-prefix` ou `-prefix Novo prefixo"
   },
 
   "invite": {
