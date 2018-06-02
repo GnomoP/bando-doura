@@ -1,4 +1,12 @@
+.vscode
+
 config.json
+prefixes.json
+
 history.log
 requests.log
+
 Gemfile.lock
+
+*~
+*.swap

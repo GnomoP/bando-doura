@@ -1,0 +1,41 @@
+{
+  "add": {
+    "description": "Adiciona uma frase ao dicionário.",
+    "usage": "-add Se nosso presidente hoje fosse o Enéias, puta que pariu..."
+  },
+
+  "say": {
+    "description": "**[OWNER ONLY]** Manda uma mensagem.",
+    "usage": "-say Lorem Ipsum Dolor Sit Amet."
+  },
+
+  "ping": {
+    "description": "Checa o ping do bot, em milisegundos.",
+    "usage": "-ping"
+  },
+
+  "source": {
+    "description": "Manda o link pro repositório do Bot.",
+    "usage": "-source"
+  },
+
+  "prefix": {
+    "description": "Mostra ou muda o prefixo utilizado no servidor ou no grupo privado.",
+    "usage": "-prefix` ou `-prefix Novo Prefixo"
+  },
+
+  "invite": {
+    "description": "Manda o link para convidar o Bot a um servidor.",
+    "usage": "-invite"
+  },
+
+  "restart": {
+    "description": "**[OWNER ONLY]** Reinicia o Bot.",
+    "usage": "-restart"
+  },
+
+  "quit": {
+    "description": "**[OWNER ONLY]** Desliga o Bot"
+  }
+
+}
