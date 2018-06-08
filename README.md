@@ -10,7 +10,7 @@ Replica a toda mensagem em um canal de texto com um xingamento aleatório. Escri
 |-----------|-----------------------------------|-------------------|
 | `add`     | Adiciona uma frase ao dicionário   .                                         | `-add Nova frase`                   |
 | `say`     | **[OWNER ONLY]** Manda uma mensagem.                                         | `-say Alguma coisa`                 |
-| `eval`    | **[OWNER ONLY]** Interpreta uma expressão em Ruby (<=2.1)                    | `-eval print bot.profile.name`      |
+| `eval`    | **[OWNER ONLY]** Interpreta uma expressão em Ruby (>=2.1)                    | `-eval print bot.profile.name`      |
 | `ping`    | Checa o ping do bot, em milisegundos.                                        | `-ping`                             |
 | `source`  | Manda o link pro repositório do Bot.                                         | `-source`                           |
 | `prefix`  | Mostra ou muda o prefixo utilizado no servidor ou no canal de texto privado. | `-prefix` ou `-prefix Novo prefixo` |
