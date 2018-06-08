@@ -169,6 +169,10 @@ bot.command :add, HELP[:add] do |event, *text|
     next "Muleque espertinho... (Sua frase **não** foi adicionada)"
   end
 
+  if text.include? bot.profile.mention
+    next "Muleque espertinho... (Sua frase **não** foi adicionada)"
+  end
+
   text = text.join(' ')
   begin
     bot.add_quote(text)
@@ -181,10 +185,22 @@ bot.command :add, HELP[:add] do |event, *text|
 end
 
 bot.command :say, HELP[:say] do |event, *text|
-  break unless event.user.id == CONFIG["bot_owner"]
+  next CONFIG["no_permission"] unless event.user.id == CONFIG["bot_owner"]
   bot.log_event(event) unless event.channel.private?
   event.message.delete() rescue puts "Couldn't delete message"
   text.join(' ')
+end
+
+bot.command :eval, HELP[:eval] do |event, *text|
+  next CONFIG["no_permission"] unless event.user.id == CONFIG["bot_owner"]
+  bot.log_event(event) unless event.channel.private?
+
+  begin
+    event << eval(text.join(" "))
+  rescue Exception => e
+    puts e.backtrace.join ""
+    puts e.message
+  end
 end
 
 bot.command :ping, HELP[:ping] do |event|
@@ -197,6 +213,7 @@ end
 
 bot.command :prefix, HELP[:prefix] do |event, *text|
   text = text.join(' ')
+  bot.log_event(event) unless event.channel.private?
 
   if event.server
     permission = event.user.permission?(:administrator, event.channel)
@@ -206,9 +223,8 @@ bot.command :prefix, HELP[:prefix] do |event, *text|
   end
 
   id = event.server.id rescue event.channel.id
-  prefix = bot.get_prefixes()[id]
+  prefix = bot.get_prefixes()[id.to_s] || CONFIG["prefix"]
 
-  prefix = CONFIG["prefix"] unless prefix
   next "Prefixo atual: \"#{prefix}\". Use `#{prefix}prefix Novo prefixo` para alterá-lo." if text.empty?
 
   bot.add_prefix(id, text)
@@ -226,28 +242,28 @@ bot.command :invite, HELP[:invite] do |event|
 end
 
 bot.command :restart, HELP[:restart] do |event|
-  break unless event.user.id == CONFIG["bot_owner"]
+  next CONFIG["no_permission"] unless event.user.id == CONFIG["bot_owner"]
   bot.log_event(event) unless event.channel.private?
   event.message.react(BYE) rescue nil
   exit 0
 end
 
 bot.command :quit, HELP[:quit] do |event|
-  break unless event.user.id == CONFIG["bot_owner"]
+  next CONFIG["no_permission"] unless event.user.id == CONFIG["bot_owner"]
   bot.log_event(event) unless event.channel.private?
   event.message.react(BYE) rescue nil
   exit 1
 end
 
 begin
-  gem 'rb-readline'
-rescue Gem::LoadError
+  require 'readline'
+rescue LoadError
   nil
 else
   bot.run :async
 end
 
-bot.mention contains: /prefixo?/i do |event|
+bot.mention contains: /prefixo?/i, from: not!(bot.profile) do |event|
   begin
     id = event.server.id rescue event.channel.id
     prefix = bot.get_prefixes()[id] || "-"
@@ -261,9 +277,14 @@ bot.mention contains: /prefixo?/i do |event|
   end
 end
 
-bot.mention contains: not!(/prefixo?/i) do |event|
+bot.mention contains: not!(/prefixo?/i), from: not!(bot.profile) do |event|
   begin
-    event << bot.pick_quote
+    id = event.server.id rescue event.channel.id
+    prefix = bot.get_prefixes()[id.to_s] || CONFIG["prefix"]
+
+    unless event.message.text.start_with? "#{prefix}add"
+      event << bot.pick_quote
+    end
   rescue Exception => e
     puts e.backtrace.join ""
     puts e.message
@@ -281,12 +302,10 @@ bot.message from: bot.profile, private: false do |event|
 end
 
 begin
-  gem 'br-readline'
-rescue Gem::LoadError
-  bot.run
-else
   require './shell'
-  shell = Shell.new(bot, CONFIG)
 
+  shell = Shell.new(bot, CONFIG)
   shell.loop()
+rescue LoadError
+  bot.run
 end
