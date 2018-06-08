@@ -13,7 +13,7 @@ def purge id = @cfg["bot_owner"], quant = 50, condition = nil
 
   history = event.channel.history(quant).select do |m|
     unless condition
-      m.author.id == bot.profile.id
+      m.author.id == @bot.profile.id
     else
       eval(condition.join(' '))
     end
